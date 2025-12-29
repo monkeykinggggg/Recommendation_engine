@@ -10,15 +10,19 @@ class BaseRecommender(ABC):
         self.gds = db.gds
         self.training_graph_name="train_graph"
     
-    # @abstractmethod
-    # def recommend(self, user_id: str, top_k: int = 10) -> List[Dict[str, Any]]:
-    #     """Generate recommendations for a user"""
-    #     pass
     
     @abstractmethod
     def get_name(self) -> str:
         """Return the name of the recommender"""
         pass
+    
+    def get_all_users_ids(self) -> List[str]:
+        query = """
+        MATCH (u:User)
+        RETURN u.user_id AS user_id
+        """
+        results = self.db.execute_query(query)
+        return [r["user_id"] for r in results]
     
     def get_user_history(self, user_id: str) -> List[str]:
         """Get products the user has already rated"""
@@ -26,7 +30,7 @@ class BaseRecommender(ABC):
         MATCH (u: User {user_id: $user_id})-[:RATED]->(p:Product)
         RETURN p.parent_asin AS product_id
         """
-        results = self.db. execute_query(query, {"user_id": user_id})
+        results = self.db.execute_query(query, {"user_id": user_id})
         return [r["product_id"] for r in results]
     
     def drop_evaluation_graph(self):

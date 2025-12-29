@@ -1,5 +1,5 @@
-from dataclasses import dataclass
-from typing import Optional
+from dataclasses import dataclass, field
+from typing import Optional, List
 
 @dataclass
 class Neo4jConfig: 
@@ -9,16 +9,23 @@ class Neo4jConfig:
 
 @dataclass
 class EmbeddingConfig: 
-    fastrp_dimensions: int = 128
-    fastrp_iteration_weights: list = None
-    sbert_model:  str = "all-MiniLM-L6-v2"
+    # for fastRP algorithm
+    embedding_dimensions: int = 32   #dlugosc wyprodukowanego wektora osadzen, im wiecej wymiarow tym wiecej informacji moze byc zakodowane w wektorze, ale zwieksza to tez wymagania pamieciowe i obliczeniowe liniowo
+    iteration_weights: List[float] = field(default_factory=lambda: [0.0, 1.0, 1.0, 0.8])   # wagi dla kolejnych iteracji algorytmu FastRP, okreslaja jak bardzo nastepne embeddingi posrednie wplywaja na istateczny wektor; przez ten wektor rowniez okreslamy ile algorytm bedzie mial iteracji
+    random_seed: int = 42  # musi być ustawiony również gdy dodajemy wpływ parametrów węzła na algorytm
     
-    def __post_init__(self):
-        if self.fastrp_iteration_weights is None: 
-            self.fastrp_iteration_weights = [0.0, 1.0, 1.0]
+    # for semantic product embeddings
+    sbert_model_name:  str = "all-MiniLM-L6-v2"
+    embedding_dim: int = 384  # For 'all-MiniLM-L6-v2'
+    batch_size: int = 64
+    vector_index_name: str = "product_semantic_index"
+    embedding_property_name: str = "semantic_embedding"
+    
 
 @dataclass
 class RecommenderConfig: 
-    top_k: int = 10
+    # model-based
+    top_k: int = 2
+    
     min_common_items: int = 2  # For collaborative filtering
     similarity_threshold: float = 0.5

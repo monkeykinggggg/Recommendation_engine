@@ -1,8 +1,6 @@
-from config.settings import Neo4jConfig, EmbeddingConfig, RecommenderConfig
+from config.settings import Neo4jConfig
 from database.connection import Neo4jConnection
-from recommenders.collaborative import CollaborativeFilteringRecommender, BaseRecommender
-
-from evaluation.metrics import RecommenderEvaluator
+from recommenders.collaborative import CollaborativeFilteringRecommender
 
 def main():
     # Initialize configuration

@@ -62,7 +62,7 @@ class CollaborativeFilteringRecommender(BaseRecommender):
         return self.db.execute_query(query, {"user_id": user_id, "minProducts": minProducts})
     
     
-    def evaluate_performance(self, test_users: List[str], top_k: int = 10) -> Dict[str, float]:
+    def evaluate_performance(self, test_users: List[str]) -> Dict[str, float]:
         """
         Ocenia algorytm metodą Leave-One-Out.
         Dla każdego usera sprawdzamy, czy jego jedyny produkt 'test' 
@@ -83,7 +83,7 @@ class CollaborativeFilteringRecommender(BaseRecommender):
             test_item = self.db.execute_query(test_item_query, {"user_id": user_id})
                 
             test_item_id = test_item[0]["parent_asin"]
-            recommendations = self.recommend_training(user_id=user_id)
+            recommendations = self.recommend_training(user_id)
             rec_ids = [r["parent_asin"] for r in recommendations]
 
             # C. Sprawdź czy trafiliśmy
@@ -105,11 +105,5 @@ class CollaborativeFilteringRecommender(BaseRecommender):
         
         return metrics
     
-    def get_all_users_ids(self) -> List[str]:
-        query = """
-        MATCH (u:User)
-        RETURN u.user_id AS user_id
-        """
-        results = self.db.execute_query(query)
-        return [r["user_id"] for r in results]
+    
 
