@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 from database.connection import Neo4jConnection
 from config.settings import EmbeddingConfig
 from sentence_transformers import SentenceTransformer
@@ -176,5 +176,121 @@ class SemanticEmbeddingGenerator:
         except Exception as e:
             print(f"Could not drop index: {e}")
             
-            
+    ### For review embeddings
+    # Add these methods to your existing TextEmbeddingGenerator class
+
+    def prepare_review_text(self, title: str, text:  str) -> str:
+        """
+        Combine review text fields into a single string for embedding.
+        
+        Args:
+            title: Review title (str)
+            text: Review body text (str)
+        """
+        parts = []
+        
+        if title:
+            parts.append(f"Review: {title}")
+        
+        if text: 
+            parts.append(text)
+        
+        return " ".join(parts)
+
+    def generate_review_embeddings(self):
+        """ Generate semantic embeddings for all reviews and store in Neo4j. """
+        print("Fetching reviews from database...")
+        
+        reviews = self.db.execute_query(f"""
+            MATCH (r:Review)
+            WHERE r.{self.config.review_embedding_property_name} IS NULL
+            RETURN r.user_id AS user_id,
+                    r.parent_asin AS parent_asin,
+                    r.title AS title,
+                    r.text AS text
+        """)
+        if len(reviews) == 0:
+            print("No reviews to embed.")
+            return 0
+        
+        print(f"Found {len(reviews)} reviews to embed.")
     
+        texts = []
+        review_keys = []
+        
+        for rev in reviews:
+            text = self.prepare_review_text(
+                title=rev.get('title') or '',
+                text=rev.get('text') or ''
+            )
+            texts.append(text)
+            review_keys.append({
+                'user_id': rev['user_id'],
+                'parent_asin': rev['parent_asin']
+            })
+    
+        print("Generating review embeddings...")
+        embeddings = self.embed_batch(texts)
+        self._store_review_embeddings(review_keys, embeddings)
+        
+        print(f"Successfully embedded {len(review_keys)} reviews!")
+        return len(review_keys)
+
+    def _store_review_embeddings(self, review_keys: List[Dict[str, str]], embeddings: List[List[float]]):
+        """Store review embeddings in Neo4j in batches."""
+        print("Storing review embeddings in Neo4j...")
+        
+        store_batch_size = 100
+    
+        for i in range(0, len(review_keys), store_batch_size):
+            batch_keys = review_keys[i:i + store_batch_size]
+            batch_embeddings = embeddings[i:i + store_batch_size]
+            
+            self.db.execute_query(f"""
+                UNWIND $batch AS item
+                MATCH (r:Review {{
+                    user_id:  item.user_id, 
+                    parent_asin: item. parent_asin
+                }})
+                SET r.{self.config.review_embedding_property_name} = item.embedding
+            """, {
+                "batch": [
+                    {**key, "embedding": emb}
+                    for key, emb in zip(batch_keys, batch_embeddings)
+                ]
+            })
+            
+            print(f"Stored {min(i + store_batch_size, len(review_keys))}/{len(review_keys)}")
+        
+        print("All review embeddings stored!")
+
+    def set_zero_embeddings_for_users_and_products(self):
+        """
+        Set zero-vector embeddings on User and Product nodes.
+        This is required for FastRP featureProperties to work, since the property
+        must exist on all node labels in the projection.
+        
+        The actual semantic content comes from Review nodes - Users and Products
+        will have their embeddings influenced through graph propagation.
+        """
+        zero_vector = [0.0] * self.config.embedding_dim
+        
+        print(f"Setting zero-vector embeddings ({self.config.embedding_dim} dims) on User nodes...")
+        user_result = self.db.execute_query(f"""
+            MATCH (u:User)
+            WHERE u.{self.config.review_embedding_property_name} IS NULL
+            SET u.{self.config.review_embedding_property_name} = $zero_vector
+            RETURN count(u) AS updated_count
+        """, {"zero_vector": zero_vector})
+        print(f"Updated {user_result[0]['updated_count']} User nodes.")
+        
+        print(f"Setting zero-vector embeddings ({self.config.embedding_dim} dims) on Product nodes...")
+        product_result = self.db.execute_query(f"""
+            MATCH (p:Product)
+            WHERE p.{self.config.review_embedding_property_name} IS NULL
+            SET p.{self.config.review_embedding_property_name} = $zero_vector
+            RETURN count(p) AS updated_count
+        """, {"zero_vector": zero_vector})
+        print(f"Updated {product_result[0]['updated_count']} Product nodes.")
+        
+        print("Zero-vector embeddings set for all Users and Products!")

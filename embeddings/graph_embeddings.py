@@ -2,7 +2,7 @@ from database.connection import Neo4jConnection
 from config.settings import EmbeddingConfig
 
 class GraphEmbeddingGenerator:
-    """Generate and manage FastRP graph embeddings in Neo4j"""
+    """Generate and manage FastRP graph embeddings in Neo4j for model based recommender"""
     
     def __init__(self, db: Neo4jConnection, config: EmbeddingConfig = None, for_production:bool=True):
         self.db = db
@@ -116,3 +116,4 @@ class GraphEmbeddingGenerator:
         res_generation = self.generate_fastrp_embeddings()
         print(res_generation)
         print("FastRP embeddings ready!")
+        
