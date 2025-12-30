@@ -219,7 +219,6 @@ class EnhancedModelBasedRecommender(BaseRecommender):
         YIELD nodesCompared, ranIterations, nodePairsConsidered, relationshipsWritten, similarityDistribution
         RETURN nodesCompared, ranIterations, nodePairsConsidered, relationshipsWritten, similarityDistribution
         """
-        #TODO parametry do ustawienia
         result = self.db.execute_query(knn_query, {
             "graph_name": self.graph_name,
             "sample_rate": self.config.review_sample_rate,
@@ -243,7 +242,7 @@ class EnhancedModelBasedRecommender(BaseRecommender):
                  SUM(s.score) AS similarity_sum,
                  COUNT(similar) AS similar_users_count
             
-            RETURN product. parent_asin AS parent_asin,
+            RETURN product.parent_asin AS parent_asin,
                    product.title AS title,
                    product.average_rating AS average_rating,
                    weighted_sum / similarity_sum AS predicted_score,
