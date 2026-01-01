@@ -1,0 +1,117 @@
+@startuml
+' Ustawienia wyglądu (Theme)
+skinparam responseMessageBelowArrow true
+skinparam maxMessageSize 200
+skinparam participant {
+  BackgroundColor White
+  BorderColor Black
+}
+
+' Aktorzy i komponenty
+actor "Zalogowany Użytkownik" as User
+participant "Frontend\n(React)" as UI #LightBlue
+participant "Backend Sklepu\n(Spring Boot)" as Shop #LightGreen
+participant "Silnik Rekomendacji\n(Python/FastAPI)" as Engine #Orange
+participant "Model NLP\n(sBERT)" as NLP #Yellow
+database "Neo4j\n(Graph DB)" as DB #Pink
+
+
+alt Scenariusz 1: Strona Główna
+    User -> UI: Wchodzi na stronę główną
+    activate UI
+    
+    UI -> Shop: GET /home
+    activate Shop
+    
+    ' Pobranie rekomendacji dla usera
+    Shop -> Engine: GET /recommendations/enhanced/{user_id}
+    activate Engine
+    
+    note right of Engine
+      Strategia: model-based CF
+      z semantyka recenzji
+    end note
+    
+    Engine -> DB: Query: Znajdź produkty które najbardziej spodobają się użytkownikowi na podstawie relacji SIMILAR_ENHANCED z innymi
+    activate DB
+    DB --> Engine: Lista produktów
+    deactivate DB
+    
+    Engine --> Shop: JSON {recommendations: [...]}
+    deactivate Engine
+    
+    ' Backend sklepu może tu jeszcze dociągnąć szczegóły produktów z bazy, jeśli Engine zwrócił same ID
+    ' Ale dla czytelności pomijamy ten krok lub zakładamy, że Engine zwraca komplet.
+    
+    Shop --> UI: Dane strony głównej + Rekomendacje
+    deactivate Shop
+    
+    UI --> User: Wyświetla listę "Polecane dla Ciebie"
+    deactivate UI
+
+' Scenariusz 2: Rekomendacja Content-Based
+else Scenariusz 2: Strona Produktu
+    ' Rozpoczęcie procesu
+    User -> UI: Wybiera produkt do podglądu
+    activate UI
+
+    ' Żądanie do backendu sklepu
+    UI -> Shop: GET /products/{product_id}
+    activate Shop
+    Shop -> DB: Pobierz detale produktu
+    activate DB
+    DB --> Shop: Zwróć dane produktu
+    deactivate DB
+
+    ' Żądanie rekomendacji
+    Shop -> Engine: GET /recommendations/content-based/{user_id}/{product_id}
+    activate Engine
+
+    Engine -> DB: Szukanie najbardziej podobnych produktów za pomocą indeksu wektorowego  (HNSW)
+    activate DB
+    DB --> Engine: Lista podobnych produktów
+    deactivate DB
+
+    ' Zwrot wyników
+    Engine --> Shop: JSON {recommendations: [...]}
+    deactivate Engine
+
+    ' Agregacja i odpowiedź do Frontendu
+    Shop --> UI: Dane produktu + Lista rekomendacji
+    deactivate Shop
+
+    ' Wyświetlenie
+    UI --> User: Wyświetla stronę produktu\nz sekcją "Podobne produkty"
+    deactivate UI
+
+
+' Scenariusz 3: Rekomendacja Query
+else Scenariusz 3: Wyszukiwanie tekstowe
+    ' Rozpoczęcie procesu
+    User -> UI: Otwiera wyszukiwarkę produktów
+    activate UI
+
+    UI -> Shop: GET /search?q={query}
+    activate Shop
+    note right of Shop
+    Sklep działa tu jako proxy
+    end note
+    Shop -> Engine: GET /search/{user_id}?q={query}
+    activate Engine
+    ' Przetwarzanie wektorowe
+    Engine -> NLP: embed_text(query)
+    activate NLP
+    NLP --> Engine: Wektor [0.12, -0.4, ...]
+    deactivate NLP
+    Engine -> DB: Szukanie najbardziej podobnych produktów za pomocą indeksu wektorowego  (HNSW)
+    activate DB
+    DB --> Engine: Lista podobnych produktów
+    deactivate DB
+    Engine --> Shop: JSON {recommendations: [...]}
+    deactivate Engine
+    Shop --> UI: Lista podobnych produktów + Ich dane
+    deactivate Shop
+    UI --> User: Wyświetla produkty pasujące do zapytania semantycznie
+    deactivate UI
+end
+@enduml
