@@ -11,10 +11,10 @@ from recommenders.content_based import ContentBasedRecommender
 
 class ProductRecommendation(BaseModel):
     parent_asin: str
-    title: Optional[str] = None
-    predicted_score: Optional[float] = None
-    similarity_score: Optional[float] = None
-    similar_users_count: Optional[int] = None
+    title: Optional[str]
+    predicted_score: Optional[float]
+    similarity_score: Optional[float]
+    similar_users_count: Optional[int]
 
 class RecommendationResponse(BaseModel):
     user_id: str

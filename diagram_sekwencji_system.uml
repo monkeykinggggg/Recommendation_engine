@@ -16,7 +16,7 @@ participant "Model NLP\n(sBERT)" as NLP #Yellow
 database "Neo4j\n(Graph DB)" as DB #Pink
 
 
-alt Scenariusz 1: Strona Główna
+group Scenariusz 1: Strona Główna
     User -> UI: Wchodzi na stronę główną
     activate UI
     
@@ -37,7 +37,7 @@ alt Scenariusz 1: Strona Główna
     DB --> Engine: Lista produktów
     deactivate DB
     
-    Engine --> Shop: JSON {recommendations: [...]}
+    Engine --> Shop: JSON z listą rekomendacji
     deactivate Engine
     
     ' Backend sklepu może tu jeszcze dociągnąć szczegóły produktów z bazy, jeśli Engine zwrócił same ID
@@ -50,7 +50,8 @@ alt Scenariusz 1: Strona Główna
     deactivate UI
 
 ' Scenariusz 2: Rekomendacja Content-Based
-else Scenariusz 2: Strona Produktu
+end
+group Scenariusz 2: Strona Produktu
     ' Rozpoczęcie procesu
     User -> UI: Wybiera produkt do podglądu
     activate UI
@@ -62,52 +63,63 @@ else Scenariusz 2: Strona Produktu
     activate DB
     DB --> Shop: Zwróć dane produktu
     deactivate DB
+    Shop --> UI: Detale na temat produktu
+    deactivate Shop
 
     ' Żądanie rekomendacji
+    UI -> Shop: GET /products/{product_id}/recommendations
+    activate Shop
     Shop -> Engine: GET /recommendations/content-based/{user_id}/{product_id}
     activate Engine
 
-    Engine -> DB: Szukanie najbardziej podobnych produktów za pomocą indeksu wektorowego  (HNSW)
+    note right of Engine
+      Strategia: content-based
+    end note
+
+    Engine -> DB: Szukanie najbardziej podobnych produktów za pomocą indeksu wektorowego
     activate DB
     DB --> Engine: Lista podobnych produktów
     deactivate DB
 
     ' Zwrot wyników
-    Engine --> Shop: JSON {recommendations: [...]}
+    Engine --> Shop: JSON z listą rekomendacji
     deactivate Engine
 
     ' Agregacja i odpowiedź do Frontendu
-    Shop --> UI: Dane produktu + Lista rekomendacji
+    Shop --> UI: Lista rekomendacji dla produktu i użytkownika
     deactivate Shop
 
     ' Wyświetlenie
-    UI --> User: Wyświetla stronę produktu\nz sekcją "Podobne produkty"
+    UI --> User: Wyświetla stronę produktu\nz sekcją "Podobne produkty" spersonalizowaną dla danego użytkownika
     deactivate UI
 
+end
 
 ' Scenariusz 3: Rekomendacja Query
-else Scenariusz 3: Wyszukiwanie tekstowe
+group Scenariusz 3: Wyszukiwanie tekstowe
     ' Rozpoczęcie procesu
-    User -> UI: Otwiera wyszukiwarkę produktów
+    User -> UI: Na stronie wyszukiwania produktów wpisuje tekst i wciska 'Szukaj'
     activate UI
 
     UI -> Shop: GET /search?q={query}
     activate Shop
-    note right of Shop
-    Sklep działa tu jako proxy
-    end note
     Shop -> Engine: GET /search/{user_id}?q={query}
     activate Engine
+    note right of Engine
+      Strategia: content-based
+      z dynamicznym tworzeniem 
+      osadzenia semantycznego zapytania
+    end note
     ' Przetwarzanie wektorowe
     Engine -> NLP: embed_text(query)
     activate NLP
-    NLP --> Engine: Wektor [0.12, -0.4, ...]
+    NLP --> Engine: Wektor osadzenia zapytania
     deactivate NLP
-    Engine -> DB: Szukanie najbardziej podobnych produktów za pomocą indeksu wektorowego  (HNSW)
+    Engine -> DB: Szukanie najbardziej podobnych produktów za pomocą indeksu wektorowego
     activate DB
     DB --> Engine: Lista podobnych produktów
     deactivate DB
-    Engine --> Shop: JSON {recommendations: [...]}
+    Engine --> Shop: JSON z listą rekomendacji
     deactivate Engine
     Shop --> UI: Lista podobnych produktów + Ich dane
     deactivate Shop
