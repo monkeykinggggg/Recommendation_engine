@@ -46,7 +46,10 @@ class ContentBasedRecommender(BaseRecommender):
             YIELD node, score
             WHERE node.parent_asin <> $product_id
             {self.get_user_filter() if user_id else ""}
-            RETURN node.parent_asin AS parent_asin, score AS semantic_similarity
+            RETURN node.parent_asin AS parent_asin,
+            node.title AS title,
+            node.images[0] as image_representative,
+            score AS semantic_similarity
             ORDER BY semantic_similarity DESC
             LIMIT $limit
         """
@@ -86,7 +89,10 @@ class ContentBasedRecommender(BaseRecommender):
             CALL db.index.vector.queryNodes($index_name, $k, $embedding)
             YIELD node, score
             WHERE true {self.get_user_filter() if user_id else ""}
-            RETURN node.parent_asin AS parent_asin, score AS semantic_similarity
+            RETURN node.parent_asin AS parent_asin, 
+            node.title AS title,
+            node.images[0] as image_representative,
+            score AS semantic_similarity
             ORDER BY semantic_similarity DESC
             LIMIT $limit
         """

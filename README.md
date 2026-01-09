@@ -1,6 +1,6 @@
 # Recommendation_engine
 
-To run : uvicorn api:app --reload --port 8000
+To run : uvicorn api:app --reload --port 7000
 
 Syntax explanation:
 api - name of the file

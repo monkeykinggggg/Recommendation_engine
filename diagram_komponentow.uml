@@ -1,0 +1,29 @@
+@startuml
+skinparam packageStyle rectangle
+skinparam defaultTextAlignment center
+
+package "Warstwa Prezentacji" {
+    component "Frontend Aplikacji Klienckiej\n(React)" as Frontend
+}
+
+package "Warstwa Logiki Biznesowej" {
+    component "Backend Aplikacji Klienckiej\n(Spring Boot)" as StoreBackend
+}
+
+package "Warstwa Analityczna i AI" {
+    component "Silnik Rekomendacji\n(Python FastAPI)" as RecEngine
+    component "Model NLP\n(sBERT)" as Model
+}
+
+package "Warstwa Danych" {
+    database "Baza Danych\n(Neo4j)" as Database
+}
+
+' Definicja relacji
+Frontend .down.> StoreBackend : REST API (JSON)\nHTTP GET/POST
+StoreBackend .down.> RecEngine : REST API (JSON)\n HTTP GET
+StoreBackend .down.> Database : Operacje CRUD
+RecEngine .down.> Database : Zapytania Cypher, GDS,\n Indeksy wektorowe
+RecEngine -left-> Model : Wywołanie lokalne
+
+@enduml

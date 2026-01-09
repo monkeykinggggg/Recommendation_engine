@@ -11,10 +11,11 @@ from recommenders.content_based import ContentBasedRecommender
 
 class ProductRecommendation(BaseModel):
     parent_asin: str
-    title: Optional[str]
-    predicted_score: Optional[float]
-    similarity_score: Optional[float]
-    similar_users_count: Optional[int]
+    title: Optional[str] = None
+    image_representative: Optional[str] = None
+    predicted_score: Optional[float] = None
+    similarity_score: Optional[float] = None
+    similar_users_count: Optional[int] = None
 
 class RecommendationResponse(BaseModel):
     user_id: str
@@ -85,13 +86,12 @@ async def get_enhanced_recommendations(user_id: str):
     """
     try:
         recommendations = state.enhanced_model_recommender.recommend_production(user_id)
-        
+        # print(recommendations.__getitem__(0).get("image_representative"))
         if not recommendations:
             raise HTTPException(
                 status_code=404, 
                 detail=f"No recommendations found for user {user_id}. User may not exist or have no similar users."
             )
-        
         return RecommendationResponse(
             user_id=user_id,
             algorithm=state.enhanced_model_recommender.get_name(),
@@ -99,6 +99,7 @@ async def get_enhanced_recommendations(user_id: str):
                 ProductRecommendation(
                     parent_asin=rec.get("parent_asin"),
                     title=rec.get("title"),
+                    image_representative=rec.get("image_representative"),
                     predicted_score=rec.get("predicted_score"),
                     similar_users_count=rec.get("similar_users_count")
                 )
@@ -124,7 +125,7 @@ async def get_content_based_recommendations(user_id: str, product_id: str):
     """
     try:
         recommendations = state.content_based_recommender.recommend_production(user_id, product_id)
-        
+        # print(recommendations.__getitem__(0).get("image_representative"))
         if not recommendations:
             raise HTTPException(
                 status_code=404,
@@ -137,6 +138,8 @@ async def get_content_based_recommendations(user_id: str, product_id: str):
             recommendations=[
                 ProductRecommendation(
                     parent_asin=rec.get("parent_asin"),
+                    title = rec.get("title"),
+                    image_representative=rec.get("image_representative"),
                     similarity_score=rec.get("semantic_similarity")
                 )
                 for rec in recommendations
@@ -162,7 +165,7 @@ async def search_products(user_id: str, q:str = Query(..., min_length=1, descrip
     try:
         # Use the content-based recommender's query search
         recommendations = state.content_based_recommender.recommend_by_query(q,user_id)
-        
+        print(recommendations.__getitem__(0).get("image_representative"))
         if not recommendations:
             raise HTTPException(
                 status_code=404,
@@ -175,6 +178,8 @@ async def search_products(user_id: str, q:str = Query(..., min_length=1, descrip
             recommendations=[
                 ProductRecommendation(
                     parent_asin=rec.get("parent_asin"),
+                    title = rec.get("title"),
+                    image_representative=rec.get("image_representative"),
                     similarity_score=rec.get("semantic_similarity")
                 )
                 for rec in recommendations

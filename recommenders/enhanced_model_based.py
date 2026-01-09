@@ -198,7 +198,7 @@ class EnhancedModelBasedRecommender(BaseRecommender):
     
     def run_knn(self):
         """Run KNN to find similar users based on enhanced embeddings."""
-        print("Cleaning old SIMILAR relationships...")
+        print("Cleaning old SIMILAR_ENHANCED relationships...")
         self.db.execute_query("MATCH ()-[r:SIMILAR_ENHANCED]->() DELETE r")
         
         print("Running KNN on enhanced embeddings to write SIMILAR_ENHANCED relationships...")
@@ -244,6 +244,7 @@ class EnhancedModelBasedRecommender(BaseRecommender):
             
             RETURN product.parent_asin AS parent_asin,
                    product.title AS title,
+                   product.images[0] as image_representative,
                    product.average_rating AS average_rating,
                    weighted_sum / similarity_sum AS predicted_score,
                    similar_users_count
