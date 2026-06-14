@@ -1,6 +1,6 @@
 # Silnik rekomendacji z MVP sklepu
 ## Architektura systemu
-<img src="./recommendation_engine/out/diagram_komponentow/diagram_komponentow.png">
+<img src="./Resources/diagram_komponentow.png">
 
 ## Przykłady wykorzystania rekomenderów
 <img src="./Resources/sklep1.png">
