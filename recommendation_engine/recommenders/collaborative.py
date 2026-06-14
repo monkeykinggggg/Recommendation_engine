@@ -1,5 +1,5 @@
 from typing import List, Dict, Any
-from recommenders.base import BaseRecommender   # Zakładam, że masz klasę bazową
+from engine.recommenders.base import BaseRecommender   # Zakładam, że masz klasę bazową
 
 class CollaborativeFilteringRecommender(BaseRecommender):
     """

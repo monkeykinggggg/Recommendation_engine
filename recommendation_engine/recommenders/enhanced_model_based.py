@@ -1,7 +1,7 @@
 from typing import List, Dict, Any
-from recommenders.base import BaseRecommender
-from embeddings.semantic_embeddings import SemanticEmbeddingGenerator
-from config. settings import RecommenderConfig
+from engine.recommenders.base import BaseRecommender
+from engine.embeddings.semantic_embeddings import SemanticEmbeddingGenerator
+from engine.config.settings import RecommenderConfig
 
 
 class EnhancedModelBasedRecommender(BaseRecommender):

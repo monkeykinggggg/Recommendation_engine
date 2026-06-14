@@ -1,5 +1,5 @@
-from database.connection import Neo4jConnection
-from config.settings import EmbeddingConfig
+from engine.database.connection import Neo4jConnection
+from engine.config.settings import EmbeddingConfig
 
 class GraphEmbeddingGenerator:
     """Generate and manage FastRP graph embeddings in Neo4j for model based recommender"""

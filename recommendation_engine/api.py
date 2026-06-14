@@ -3,10 +3,10 @@ from contextlib import asynccontextmanager
 from typing import List, Optional
 from pydantic import BaseModel
 
-from config.settings import Neo4jConfig
-from database.connection import Neo4jConnection
-from recommenders.enhanced_model_based import EnhancedModelBasedRecommender
-from recommenders.content_based import ContentBasedRecommender
+from engine.config.settings import Neo4jConfig
+from engine.database.connection import Neo4jConnection
+from engine.recommenders.enhanced_model_based import EnhancedModelBasedRecommender
+from engine.recommenders.content_based import ContentBasedRecommender
 
 
 class ProductRecommendation(BaseModel):

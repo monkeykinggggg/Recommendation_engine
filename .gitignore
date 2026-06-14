@@ -1,17 +1,46 @@
-# virtual environment
-my_env/
+node_modules/
 
-# Byte-compiled / optimized / DLL files
+
+# backend
+.mvn/
+.idea/
+
+HELP.md
+target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+
+# engine
 __pycache__/
-*.py[codz]
-*$py.class
-
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-out/
-
-
-
-
+*.pyc
+my_env/

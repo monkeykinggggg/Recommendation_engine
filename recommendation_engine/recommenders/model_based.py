@@ -1,7 +1,7 @@
 from typing import List, Dict, Any
-from recommenders.base import BaseRecommender
-from embeddings.graph_embeddings import GraphEmbeddingGenerator
-from config.settings import RecommenderConfig
+from engine.recommenders.base import BaseRecommender
+from engine.embeddings.graph_embeddings import GraphEmbeddingGenerator
+from engine.config.settings import RecommenderConfig
 
 class ModelBasedRecommender(BaseRecommender):
     """

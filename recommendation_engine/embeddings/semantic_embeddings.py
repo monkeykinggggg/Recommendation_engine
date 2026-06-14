@@ -1,6 +1,6 @@
 from typing import List, Dict
-from database.connection import Neo4jConnection
-from config.settings import EmbeddingConfig
+from engine.database.connection import Neo4jConnection
+from engine.config.settings import EmbeddingConfig
 from sentence_transformers import SentenceTransformer
 
 class SemanticEmbeddingGenerator:

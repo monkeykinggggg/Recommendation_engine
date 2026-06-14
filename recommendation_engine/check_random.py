@@ -1,6 +1,6 @@
-from config.settings import Neo4jConfig
-from database.connection import Neo4jConnection
-from recommenders.random_rec import RandomRecommender
+from engine.config.settings import Neo4jConfig
+from engine.database.connection import Neo4jConnection
+from engine.recommenders.random_rec import RandomRecommender
 
 def main():
     db_config = Neo4jConfig()

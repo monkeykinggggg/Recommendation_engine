@@ -1,6 +1,6 @@
-from config.settings import Neo4jConfig
-from database.connection import Neo4jConnection
-from recommenders.collaborative import CollaborativeFilteringRecommender
+from engine.config.settings import Neo4jConfig
+from engine.database.connection import Neo4jConnection
+from engine.recommenders.collaborative import CollaborativeFilteringRecommender
 
 def main():
     # Initialize configuration

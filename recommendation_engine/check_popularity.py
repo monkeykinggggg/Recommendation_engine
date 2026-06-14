@@ -1,6 +1,6 @@
-from config.settings import Neo4jConfig
-from database.connection import Neo4jConnection
-from recommenders.popularity import PopularityRecommender
+from engine.config.settings import Neo4jConfig
+from engine.database.connection import Neo4jConnection
+from engine.recommenders.popularity import PopularityRecommender
 
 def main():
     db_config = Neo4jConfig()

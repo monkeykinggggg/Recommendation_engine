@@ -1,9 +1,9 @@
-from config.settings import Neo4jConfig, RecommenderConfig
-from database.connection import Neo4jConnection
-from recommenders.enhanced_model_based import EnhancedModelBasedRecommender
-from embeddings.graph_embeddings import GraphEmbeddingGenerator
-from embeddings.semantic_embeddings import SemanticEmbeddingGenerator
-from config.settings import EmbeddingConfig
+from engine.config.settings import Neo4jConfig, RecommenderConfig
+from engine.database.connection import Neo4jConnection
+from engine.recommenders.enhanced_model_based import EnhancedModelBasedRecommender
+from engine.embeddings.graph_embeddings import GraphEmbeddingGenerator
+from engine.embeddings.semantic_embeddings import SemanticEmbeddingGenerator
+from engine.config.settings import EmbeddingConfig
 
 def main():
     # Initialize configuration

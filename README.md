@@ -1,8 +1,15 @@
-# Recommendation_engine
+# Silnik rekomendacji z MVP sklepu
+## Architektura systemu
+<img src="./engine/out/diagram_komponentow/diagram_komponentow.png">
 
-To run : uvicorn api:app --reload --port 7000
+## Przykłady wykorzystania rekomenderów
+<img src="./Resources/sklep1.png">
 
-Syntax explanation:
-api - name of the file
-app - name of the fastapi app component
---reload  = reload on every change
+---
+
+<img src="./Resources/sklep21.png">
+<img src="./Resources/sklep22.png">
+
+---
+
+<img src="./Resources/sklep3.png">

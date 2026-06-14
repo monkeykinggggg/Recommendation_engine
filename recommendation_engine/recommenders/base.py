@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List, Dict, Any
-from database.connection import Neo4jConnection
+from engine.database.connection import Neo4jConnection
 
 class BaseRecommender(ABC):
     """Abstract base class for all recommenders"""

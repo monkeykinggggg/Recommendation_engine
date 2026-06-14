@@ -1,7 +1,7 @@
-from config.settings import Neo4jConfig, RecommenderConfig
-from database.connection import Neo4jConnection
-from recommenders. content_based import ContentBasedRecommender
-from embeddings.semantic_embeddings import SemanticEmbeddingGenerator
+from engine.config.settings import Neo4jConfig, RecommenderConfig
+from engine.database.connection import Neo4jConnection
+from engine.recommenders.content_based import ContentBasedRecommender
+from engine.embeddings.semantic_embeddings import SemanticEmbeddingGenerator
 
 def main():
     db_config = Neo4jConfig()

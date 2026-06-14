@@ -1,6 +1,6 @@
-from config.settings import Neo4jConfig, EmbeddingConfig, RecommenderConfig
-from database.connection import Neo4jConnection
-from recommenders.collaborative import CollaborativeFilteringRecommender, BaseRecommender
+from engine.config.settings import Neo4jConfig, EmbeddingConfig, RecommenderConfig
+from engine.database.connection import Neo4jConnection
+from engine.recommenders.collaborative import CollaborativeFilteringRecommender, BaseRecommender
 
 from evaluation.metrics import RecommenderEvaluator
 

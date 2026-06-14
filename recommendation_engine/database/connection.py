@@ -1,7 +1,7 @@
 from neo4j import GraphDatabase
 from graphdatascience import GraphDataScience
 from contextlib import contextmanager
-from config.settings import Neo4jConfig
+from engine.config.settings import Neo4jConfig
 
 class Neo4jConnection: 
     _instance = None

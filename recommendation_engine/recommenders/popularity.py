@@ -1,44 +1,46 @@
 from typing import List, Dict, Any
-from recommenders.base import BaseRecommender
+from engine.recommenders.base import BaseRecommender
 
 
-class RandomRecommender(BaseRecommender):
+class PopularityRecommender(BaseRecommender):
     """
-    Random baseline recommender that returns 10 random products.
-    This is the absolute minimum baseline - any real algorithm should beat this.
+    Simple baseline recommender that returns the most popular products.
+    Popularity is measured by the number of ratings a product has received.
     """
 
     def get_name(self) -> str:
-        return "Random (Baseline)"
+        return "Popularity-Based"
 
     def recommend_training(self, user_id: str) -> List[Dict[str, Any]]:
         """
-        Recommend 10 random products from training data,
+        Recommend top 10 most popular products from training data,
         excluding products the user has already rated in training.
         """
         query = """
         MATCH (me:User {user_id: $userId})
-        MATCH (p:Product)<-[r:RATED {split: 'train'}]-(:User)
+        MATCH (p:Product)<-[r:RATED{split: 'train'}]-(:User)
         WHERE NOT EXISTS { (me)-[:RATED {split: 'train'}]->(p) }
-        WITH DISTINCT p
-        RETURN p.parent_asin AS parent_asin, rand() AS predicted_score
-        ORDER BY predicted_score DESC
+        RETURN p.parent_asin AS parent_asin,
+            p.rating_number AS rating_count,
+            p.average_rating AS average_rating
+        ORDER BY p.rating_number DESC, p.average_rating DESC
         LIMIT 10
         """
         return self.db.execute_query(query, {"userId": user_id})
 
     def recommend_production(self, user_id: str) -> List[Dict[str, Any]]:
         """
-        Recommend 10 random products from all data,
+        Recommend top 10 most popular products from all data,
         excluding products the user has already rated.
         """
         query = """
         MATCH (me:User {user_id: $userId})
         MATCH (p:Product)<-[r:RATED]-(:User)
         WHERE NOT EXISTS { (me)-[:RATED]->(p) }
-        WITH DISTINCT p
-        RETURN p.parent_asin AS parent_asin, rand() AS predicted_score
-        ORDER BY predicted_score DESC
+        RETURN p.parent_asin AS parent_asin,
+            p.rating_number AS rating_count,
+            p.average_rating AS average_rating
+        ORDER BY p.rating_number DESC, p.average_rating DESC
         LIMIT 10
         """
         return self.db.execute_query(query, {"userId": user_id})
@@ -53,7 +55,7 @@ class RandomRecommender(BaseRecommender):
         reciprocal_rank_sum = 0
         users_evaluated = 0
 
-        print(f"Starting evaluation of Random Baseline for {len(test_users)} users...")
+        print(f"Starting evaluation of Popularity Baseline for {len(test_users)} users...")
 
         for user_id in test_users:
             # Get the 'hidden' product from TEST set
